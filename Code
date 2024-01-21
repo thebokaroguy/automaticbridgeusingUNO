@@ -1,0 +1,55 @@
+#include <Servo.h>
+
+const int trigPin = 2;    // Ultrasonic sensor trig pin
+const int echoPin = 3;    // Ultrasonic sensor echo pin
+const int servoPin = 9;   // Servo motor control pin
+
+Servo bridgeServo;
+
+const int thresholdDistance = 20;  // Threshold distance in centimeters
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  bridgeServo.attach(servoPin);
+}
+
+void loop() {
+  long duration, distance;
+
+  // Trigger ultrasonic sensor
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Read the echo pulse
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance in centimeters
+  distance = duration * 0.034 / 2;
+
+  Serial.print("Distance: ");
+  Serial.println(distance);
+
+  // Check if water level is above the threshold
+  if (distance <= thresholdDistance) {
+    liftBridge();
+  } else {
+    lowerBridge();
+  }
+
+  delay(1000);  // Adjust delay as needed
+}
+
+void liftBridge() {
+  bridgeServo.write(90);  // Angle to lift the bridge
+  delay(2000);            // Adjust delay for the bridge to lift completely
+}
+
+void lowerBridge() {
+  bridgeServo.write(0);   // Angle to lower the bridge
+  delay(2000);            // Adjust delay for the bridge to lower completely
+}
